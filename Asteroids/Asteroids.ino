@@ -308,14 +308,14 @@ void moveAsteroids() {
 void moveShot(Shot *s) {
   switch (s->heading) {
     case 0:
-      s->y -= SHOT_SPEED * 2;
+      s->y += SHOT_SPEED * 2;
       break;
     case 1:
-      s->y -= SHOT_SPEED * 2;
+      s->y += SHOT_SPEED * 2;
       s->x += SHOT_SPEED;
       break;
     case 2: // 45 degrees
-      s->y -= SHOT_SPEED * 2;
+      s->y += SHOT_SPEED * 2;
       s->x += SHOT_SPEED * 2;
       break;
     case 3:
@@ -327,44 +327,44 @@ void moveShot(Shot *s) {
       break;
     case 5:
       s->x += SHOT_SPEED * 2;
-      s->y += SHOT_SPEED;
+      s->y -= SHOT_SPEED;
       break;
     case 6:
       s->x += SHOT_SPEED * 2;
-      s->y += SHOT_SPEED * 2;
+      s->y -= SHOT_SPEED * 2;
       break;
     case 7:
-      s->y += SHOT_SPEED * 2;
+      s->y -= SHOT_SPEED * 2;
       s->x += SHOT_SPEED;
       break;
     case 8:
-      s->y += SHOT_SPEED * 2;
+      s->y -= SHOT_SPEED * 2;
       break;
     case 9:
-      s->y += SHOT_SPEED * 2;
+      s->y -= SHOT_SPEED * 2;
       s->x -= SHOT_SPEED;
       break;
     case 10:
       s->x -= SHOT_SPEED * 2;
-      s->y += SHOT_SPEED * 2;
+      s->y -= SHOT_SPEED * 2;
       break;
     case 11:
       s->x -= SHOT_SPEED * 2;
-      s->y += SHOT_SPEED;
+      s->y -= SHOT_SPEED;
       break;
     case 12:
       s->x -= SHOT_SPEED * 2;
       break;
     case 13:
       s->x -= SHOT_SPEED * 2;
-      s->y -= SHOT_SPEED;
+      s->y += SHOT_SPEED;
       break;
     case 14:
       s->x -= SHOT_SPEED * 2;
       s->y -= SHOT_SPEED * 2;
       break;
     case 15:
-      s->y -= SHOT_SPEED * 2;
+      s->y += SHOT_SPEED * 2;
       s->x -= SHOT_SPEED;
       break;
   }
