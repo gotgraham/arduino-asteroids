@@ -1019,12 +1019,15 @@ void newLevel() {
 }
 
 void gameOver() {
+  delay(500);
+  laser.setScale(0.25);
   // tv.delay(500);
   // tv.fill(0);
   //// tv.select_font(font6x8);
-  strcpy_P(s, (char *)pgm_read_word(&(strings[2])));
-  // tv.print(40, 40, s);
-  strcpy_P(s, (char *)pgm_read_word(&(strings[3])));
+  for(int i = 0; i < 100; i++) {
+    Drawing::drawString("GAME OVER", 2048, 2048);
+  }
+
   // tv.print(72, 40, s);
   // tv.delay(2000);
 }
@@ -1270,7 +1273,7 @@ int getMemory() {
 boolean getInput() {
   boolean input = false;
 
-  if (true /* Controller.firePressed() */) {
+  if (false /* Controller.firePressed() */) {
     if (true /*!fired*/) {
       fired = true;
       input = true;
@@ -1764,9 +1767,9 @@ void loop() {
 
   if (remainingShips == 0) {
     gameOver();
-    if (score > 0) {
-      enterHighScore(1);
-    }
+    // if (score > 0) {
+    //   enterHighScore(1);
+    // }
     initGame(displayHighScores(1));
   }
 }
