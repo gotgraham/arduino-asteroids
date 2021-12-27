@@ -4,6 +4,7 @@
 #include <avr/pgmspace.h>
 
 extern const uint8_t ship_vertices[];
+extern const unsigned short ship_objects[];
 
 #endif
 
