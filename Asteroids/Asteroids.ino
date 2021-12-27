@@ -601,7 +601,7 @@ void drawSaucer() {
     }
 
 
-    Drawing::drawObject(saucer_objects, SIZEOF_SAUCER_OBJECT_RECORD * 2, saucerX, saucerY);
+    Drawing::drawObject(saucer_objects, SIZEOF_SAUCER_OBJECT_RECORD, saucerX, saucerY);
     //overlaybitmap(saucerX, saucerY, saucer_bitmaps, 0, 0, 0);
 
     if (saucerX == endSaucerX) {
@@ -871,7 +871,7 @@ boolean detectCollisions() {
 
   // Detect saucer collisions
   if ((saucerX != 255) && (saucerY != 255)) {
-    xvert = saucer_vertices;
+    xvert = saucer_vertices; // TODO - look at this one
     yvert = saucer_vertices + 6;
     for (byte j = 0; j < 3; j++) {
       // Check each of the 3 vertices on the ship
