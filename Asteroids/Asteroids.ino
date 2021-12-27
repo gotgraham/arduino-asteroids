@@ -27,7 +27,7 @@
 #include "ship_vertices.h"
 #include "saucer_vertices.h"
 #include "explosion_bitmaps.h"
-#include "ship_explosion_bitmaps.h"
+#include "ship_explosion_objects.h"
 #include "explosion_frequencies.h"
 #include "asteroids_font.h"
 
@@ -370,16 +370,18 @@ void moveShot(Shot *s) {
   if (s->x > 250) {
     s->x = W - 1;
   } else {
-    if (s->x > W - 1) {
-      s->x = 0;
-    }
+    // JTG - This causes the shots to loop back on the opposite side of the screen. It's kind of weird looking
+    // if (s->x > W - 1) {
+    //   s->x = 0;
+    // }
   }
   if (s->y > 250) {
     s->y = H - 1;
   } else {
-    if (s->y > H - 1) {
-      s->y = 0;
-    }
+    // JTG - This causes the shots to loop back on the opposite side of the screen. It's kind of weird looking
+    // if (s->y > H - 1) {
+    //   s->y = 0;
+    // }
   }
 }
 
@@ -454,28 +456,33 @@ void displayScore() {
 }
 
 void drawExplosions() {
+  // This is the spot for the regular explosions
   for (byte i = 0; i < MAX_EXPLOSIONS; i++) {
     if (explosions[i].index != 255) {
-      if (explosions[i].index > 0) {
-        erasebitmap(explosions[i].x, explosions[i].y, explosion_bitmaps + ((explosions[i].index - 1) * SIZEOF_EXPLOSION_BITMAP_RECORD), 0, 0, 0);
-      }
+      // if (explosions[i].index > 0) {
+      //   erasebitmap(explosions[i].x, explosions[i].y, explosion_bitmaps + ((explosions[i].index - 1) * SIZEOF_EXPLOSION_BITMAP_RECORD), 0, 0, 0);
+      // }
       if (explosions[i].index > 4) {
         explosions[i].index = 255;
       } else {
-        overlaybitmap(explosions[i].x, explosions[i].y, explosion_bitmaps + (explosions[i].index++ * SIZEOF_EXPLOSION_BITMAP_RECORD), 0, 0, 0);
+        uint8_t vert_count = ship_explosion_vert_count[explosions[i].index];
+        Drawing::drawObject(ship_explosion_objects + (explosions[i].index++ * SIZEOF_EXPLOSION_OBJECT_RECORD), vert_count, explosions[i].x, explosions[i].y);
+        // overlaybitmap(explosions[i].x, explosions[i].y, explosion_bitmaps + (explosions[i].index++ * SIZEOF_EXPLOSION_BITMAP_RECORD), 0, 0, 0);
       }
     }
   }
 
   if (shipExplosion.index != 255) {
     if ((clock % 4) == 0) {
-      if (shipExplosion.index > 0) {
-        erasebitmap(shipExplosion.x, shipExplosion.y, ship_explosion_bitmaps + ((shipExplosion.index - 1) * SIZEOF_EXPLOSION_BITMAP_RECORD), 0, 0, 0);
-      }
+      // if (shipExplosion.index > 0) {
+      //   erasebitmap(shipExplosion.x, shipExplosion.y, ship_explosion_bitmaps + ((shipExplosion.index - 1) * SIZEOF_EXPLOSION_BITMAP_RECORD), 0, 0, 0);
+      // }
       if (shipExplosion.index > 5) {
         shipExplosion.index = 255;
       } else {
-        overlaybitmap(shipExplosion.x, shipExplosion.y, ship_explosion_bitmaps + (shipExplosion.index++ * SIZEOF_EXPLOSION_BITMAP_RECORD), 0, 0, 0);
+        uint8_t vert_count = ship_explosion_vert_count[shipExplosion.index];
+        Drawing::drawObject(ship_explosion_objects + (shipExplosion.index++ * SIZEOF_EXPLOSION_OBJECT_RECORD), vert_count, shipExplosion.x, shipExplosion.y);
+       // overlaybitmap(shipExplosion.x, shipExplosion.y, ship_explosion_bitmaps + (shipExplosion.index++ * SIZEOF_EXPLOSION_BITMAP_RECORD), 0, 0, 0);
       }
     }
   }
@@ -779,7 +786,7 @@ boolean detectCollisions() {
         shots[j].ttl = 0xFF;
 
         if (explosions[explosionIndex].index != 255) {
-          erasebitmap(explosions[explosionIndex].x, explosions[explosionIndex].y, explosion_bitmaps + ((explosions[explosionIndex].index - 1) * SIZEOF_EXPLOSION_BITMAP_RECORD), 0, 0, 0);
+          // erasebitmap(explosions[explosionIndex].x, explosions[explosionIndex].y, explosion_bitmaps + ((explosions[explosionIndex].index - 1) * SIZEOF_EXPLOSION_BITMAP_RECORD), 0, 0, 0);
         }
         explosions[explosionIndex].x = asteroids[i].x;
         explosions[explosionIndex].y = asteroids[i].y;
@@ -918,7 +925,7 @@ boolean detectCollisions() {
         // tv.set_pixel(shots[j].x, shots[j].y, 0);
         shots[j].ttl = 0xFF;
         if (explosions[explosionIndex].index != 255) {
-          erasebitmap(explosions[explosionIndex].x, explosions[explosionIndex].y, explosion_bitmaps + ((explosions[explosionIndex].index - 1) * SIZEOF_EXPLOSION_BITMAP_RECORD), 0, 0, 0);
+          // erasebitmap(explosions[explosionIndex].x, explosions[explosionIndex].y, explosion_bitmaps + ((explosions[explosionIndex].index - 1) * SIZEOF_EXPLOSION_BITMAP_RECORD), 0, 0, 0);
         }
         explosions[explosionIndex].x = saucerX;
         explosions[explosionIndex].y = saucerY;
