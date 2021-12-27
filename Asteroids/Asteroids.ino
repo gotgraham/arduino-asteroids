@@ -25,7 +25,6 @@
 #include "asteroid_vertices.h"
 #include "fire_vertices.h"
 #include "ship_vertices.h"
-#include "saucer_bitmaps.h"
 #include "saucer_vertices.h"
 #include "explosion_bitmaps.h"
 #include "ship_explosion_bitmaps.h"
@@ -500,7 +499,7 @@ void drawSaucer() {
 
   if ((saucerX != 255) && (saucerY != 255)) {
     // saucer is active
-    erasebitmap(saucerX, saucerY, saucer_bitmaps, 0, 0, 0);
+    // erasebitmap(saucerX, saucerY, saucer_bitmaps, 0, 0, 0);
     if (random(0, 100) < 3) {
       byte newHeading = saucerHeading + ((random(0, 2) - 1) * 2);
       if (((newHeading > 1) && (newHeading < 7)) || ((newHeading > 9) && (newHeading < 15))) {
@@ -605,7 +604,7 @@ void drawSaucer() {
     //overlaybitmap(saucerX, saucerY, saucer_bitmaps, 0, 0, 0);
 
     if (saucerX == endSaucerX) {
-      erasebitmap(saucerX, saucerY, saucer_bitmaps, 0, 0, 0);
+      // erasebitmap(saucerX, saucerY, saucer_bitmaps, 0, 0, 0);
       saucerX = 255;
       saucerY = 255;
       return;
@@ -886,7 +885,7 @@ boolean detectCollisions() {
       if (inPolygon(6, xvert, yvert, sx - saucerX, sy - saucerY)) {
         // Hit by saucer!
         die();
-        erasebitmap(saucerX, saucerY, saucer_bitmaps, 0, 0, 0);
+        // erasebitmap(saucerX, saucerY, saucer_bitmaps, 0, 0, 0);
         saucerX = 255;
         saucerY = 255;
         for (byte k = 0; k < MAX_SHOTS; k++) {
@@ -915,7 +914,7 @@ boolean detectCollisions() {
         sound = EXPLOSION;
         scored = true;
         incrementScore(500);
-        erasebitmap(saucerX, saucerY, saucer_bitmaps, 0, 0, 0);
+        // erasebitmap(saucerX, saucerY, saucer_bitmaps, 0, 0, 0);
         // tv.set_pixel(shots[j].x, shots[j].y, 0);
         shots[j].ttl = 0xFF;
         if (explosions[explosionIndex].index != 255) {
