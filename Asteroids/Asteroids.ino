@@ -10,7 +10,6 @@
 */
 #include <avr/pgmspace.h>
 #include <EEPROM.h>
-//#include <Controllers.h>
 
 // Laser
 #include "Laser.h"
@@ -19,6 +18,7 @@
 // Astroids Specific
 
 #include "Asteroids.h"
+#include "button_controller.h"
 #include "title_bitmap.h"
 #include "hackvision_logo_bitmap.h"
 #include "asteroid_bitmaps.h"
@@ -319,7 +319,7 @@ void moveShot(Shot *s) {
       break;
     case 3:
       s->x += SHOT_SPEED * 2;
-      s->y -= SHOT_SPEED;
+      s->y += SHOT_SPEED;
       break;
     case 4:
       s->x += SHOT_SPEED * 2;
@@ -360,7 +360,7 @@ void moveShot(Shot *s) {
       break;
     case 14:
       s->x -= SHOT_SPEED * 2;
-      s->y -= SHOT_SPEED * 2;
+      s->y += SHOT_SPEED * 2;
       break;
     case 15:
       s->y += SHOT_SPEED * 2;
@@ -693,7 +693,7 @@ void drawShip() {
     Drawing::drawObject(ship_objects + (shipHeading * SIZEOF_SHIP_OBJECT_RECORD * 2), SIZEOF_SHIP_OBJECT_RECORD, oldShipX, oldShipY);
 
     // This must be a thrust indicator. We'll need to calculate the rear midpoint of the ship and put the thrust there
-    if (false /* Controller.upPressed() */) {
+    if (Controller.upPressed()) {
       // tv.set_pixel(oldShipX + thrustX, oldShipY + thrustY, clock % 2);
     }
   }
@@ -1056,7 +1056,7 @@ void enterInitials() {
     // tv.draw_line(56, 28, 88, 28, 0);
     // tv.draw_line(56 + (index * 8), 28, 56 + (index * 8) + 6, 28, 1);
     // tv.delay(150);
-    if (false /* Controller.leftPressed() */) {
+    if (Controller.leftPressed()) {
       index--;
       if (index < 0) {
         index = 0;
@@ -1064,7 +1064,7 @@ void enterInitials() {
         playTone(1046, 20);
       }
     }
-    if (false /* Controller.rightPressed() */) {
+    if (Controller.rightPressed()) {
       index++;
       if (index > 2) {
         index = 2;
@@ -1072,7 +1072,7 @@ void enterInitials() {
         playTone(1046, 20);
       }
     }
-    if (false /* Controller.upPressed() */) {
+    if (Controller.upPressed()) {
       initials[index]++;
       playTone(523, 20);
       // A-Z 0-9 :-? !-/ ' '
@@ -1089,7 +1089,7 @@ void enterInitials() {
         initials[index] = '!';
       }
     }
-    if (false /* Controller.downPressed() */) {
+    if (Controller.downPressed()) {
       initials[index]--;
       playTone(523, 20);
       if (initials[index] == ' ') {
@@ -1105,7 +1105,7 @@ void enterInitials() {
         initials[index] = ' ';
       }
     }
-    if (false /* Controller.firePressed() */) {
+    if (Controller.firePressed()) {
       if (index < 2) {
         index++;
         playTone(1046, 20);
@@ -1218,7 +1218,7 @@ boolean displayHighScores(byte file) {
 boolean pollFireButton(int n) {
   for (int i = 0; i < n; i++) {
     // tv.delay(15);
-    if (false /* Controller.firePressed() */) {
+    if (Controller.firePressed()) {
       return true;
     }
   }
@@ -1273,8 +1273,8 @@ int getMemory() {
 boolean getInput() {
   boolean input = false;
 
-  if (false /* Controller.firePressed() */) {
-    if (true /*!fired*/) {
+  if (Controller.firePressed()) {
+    if (!fired) {
       fired = true;
       input = true;
       freq = F2;
@@ -1306,14 +1306,14 @@ boolean getInput() {
     fired = false;
   }
 
-  if (false /* Controller.leftPressed() */) {
+  if (Controller.leftPressed()) {
     shipHeading--;
     if (shipHeading == 255) {
       shipHeading = 15;
     }
     input = true;
   } else {
-    if (false /* Controller.rightPressed() */) {
+    if (Controller.rightPressed()) {
       shipHeading++;
       if (shipHeading > 15) {
         shipHeading = 0;
@@ -1323,7 +1323,7 @@ boolean getInput() {
   }
 
 
-  if (false /* Controller.upPressed() */) {
+  if (Controller.upPressed()) {
     // tv.set_pixel(oldShipX + thrustX, oldShipY + thrustY, 0);
     switch (shipHeading) {
       case 0: // straight up
@@ -1333,19 +1333,19 @@ boolean getInput() {
         break;
       case 1: // 22.5 degrees
         shipDX += THRUST * SIN22_5;
-        shipDY -= THRUST * SIN67_5;
+        shipDY += THRUST * SIN67_5;
         thrustX = 2;
         thrustY = 6;
         break;
       case 2: // 45 degrees
         shipDX += THRUST * SIN45;
-        shipDY -= THRUST * SIN45;
+        shipDY += THRUST * SIN45;
         thrustX = 1;
         thrustY = 5;
         break;
       case 3:
         shipDX += THRUST * SIN67_5;
-        shipDY -= THRUST * SIN22_5;
+        shipDY += THRUST * SIN22_5;
         thrustX = 1;
         thrustY = 3;
         break;
@@ -1356,42 +1356,42 @@ boolean getInput() {
         break;
       case 5:
         shipDX += THRUST * SIN67_5;
-        shipDY += THRUST * SIN22_5;
+        shipDY -= THRUST * SIN22_5;
         thrustX = 1;
         thrustY = 2;
         break;
       case 6:
         shipDX += THRUST * SIN45;
-        shipDY += THRUST * SIN45;
+        shipDY -= THRUST * SIN45;
         thrustX = 1;
         thrustY = 1;
         break;
       case 7:
         shipDX += THRUST * SIN22_5;
-        shipDY += THRUST * SIN67_5;
+        shipDY -= THRUST * SIN67_5;
         thrustX = 2;
         thrustY = 1;
         break;
       case 8:
-        shipDY += THRUST;
+        shipDY -= THRUST;
         thrustX = 3;
         thrustY = 0;
         break;
       case 9:
         shipDX -= THRUST * SIN22_5;
-        shipDY += THRUST * SIN67_5;
+        shipDY -= THRUST * SIN67_5;
         thrustX = 3;
         thrustY = 1;
         break;
       case 10:
         shipDX -= THRUST * SIN45;
-        shipDY += THRUST * SIN45;
+        shipDY -= THRUST * SIN45;
         thrustX = 5;
         thrustY = 1;
         break;
       case 11:
         shipDX -= THRUST * SIN67_5;
-        shipDY += THRUST * SIN22_5;
+        shipDY -= THRUST * SIN22_5;
         thrustX = 6;
         thrustY = 2;
         break;
@@ -1402,19 +1402,19 @@ boolean getInput() {
         break;
       case 13:
         shipDX -= THRUST * SIN67_5;
-        shipDY -= THRUST * SIN22_5;
+        shipDY += THRUST * SIN22_5;
         thrustX = 6;
         thrustY = 3;
         break;
       case 14:
         shipDX -= THRUST * SIN45;
-        shipDY -= THRUST * SIN45;
+        shipDY += THRUST * SIN45;
         thrustX = 5;
         thrustY = 5;
         break;
       case 15:
         shipDX -= THRUST * SIN22_5;
-        shipDY -= THRUST * SIN67_5;
+        shipDY += THRUST * SIN67_5;
         thrustX = 3;
         thrustY = 6;
         break;
@@ -1423,7 +1423,7 @@ boolean getInput() {
     shipDY = min(shipDY, 10.0);
     input = true;
   } else {
-    if (false /* Controller.downPressed()) && (hyperspaceCount == -1) */) {
+    if (Controller.downPressed() && (hyperspaceCount == -1)) {
       // Hyperspace!
       // or as my son Paul calls it, "Galaxy Warp"
       //erasebitmap(oldShipX, oldShipY, ship_bitmaps + (oldShipHeading * SIZEOF_SHIP_BITMAP_RECORD), 0, 0, 0);

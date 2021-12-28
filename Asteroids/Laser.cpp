@@ -22,7 +22,7 @@ Laser::Laser(int laserPin)
   _oldY = 0;
 
   _state = 0;
-  
+
   _scale = 1;
   _offsetX = 0;
   _offsetY = 0;
@@ -43,7 +43,7 @@ void Laser::init()
   dac.setGain2x(MCP4X_CHAN_A, 0);
   dac.setGain2x(MCP4X_CHAN_B, 0);
   dac.begin(1);
- 
+
   pinMode(_laserPin, OUTPUT);
 }
 
@@ -104,7 +104,7 @@ int Laser::computeOutCode(long x, long y)
 }
 
 // Cohen–Sutherland clipping algorithm clips a line from
-// P0 = (x0, y0) to P1 = (x1, y1) against a rectangle with 
+// P0 = (x0, y0) to P1 = (x1, y1) against a rectangle with
 // diagonal from (_clipXMin, _clipYMin) to (_clipXMax, _clipYMax).
 bool Laser::clipLine(long& x0, long& y0, long& x1, long& y1)
 {
@@ -112,7 +112,7 @@ bool Laser::clipLine(long& x0, long& y0, long& x1, long& y1)
   int outcode0 = computeOutCode(x0, y0);
   int outcode1 = computeOutCode(x1, y1);
   bool accept = false;
-  
+
   while (true) {
     if (!(outcode0 | outcode1)) { // Bitwise OR is 0. Trivially accept and get out of loop
       accept = true;
@@ -194,7 +194,7 @@ void Laser::sendtoRaw (long xNew, long yNew)
   // devide into equal parts, using _quality
   long fdiffx = xNew - _x;
   long fdiffy = yNew - _y;
-  long diffx = TO_INT(abs(fdiffx) * _quality); 
+  long diffx = TO_INT(abs(fdiffx) * _quality);
   long diffy = TO_INT(abs(fdiffy) * _quality);
 
   // store movement for max move
@@ -202,16 +202,16 @@ void Laser::sendtoRaw (long xNew, long yNew)
   _moved += abs(fdiffx) + abs(fdiffy);
 
   // use the bigger direction
-  if (diffx < diffy) 
+  if (diffx < diffy)
   {
-    diffx = diffy;     
+    diffx = diffy;
   }
   fdiffx = FROM_INT(fdiffx) / diffx;
   fdiffy = FROM_INT(fdiffy) / diffx;
   // interpolate in FIXPT
   FIXPT tmpx = 0;
   FIXPT tmpy = 0;
-  for (int i = 0; i<diffx-1;i++) 
+  for (int i = 0; i<diffx-1;i++)
   {
     // for max move, stop inside of line if required...
     if (_maxMove != -1) {
@@ -222,7 +222,7 @@ void Laser::sendtoRaw (long xNew, long yNew)
         _maxMoveX = _x + TO_INT(tmpx);
         _maxMoveY = _y + TO_INT(tmpy);
       }
-    } 
+    }
     tmpx += fdiffx;
     tmpy += fdiffy;
     sendToDAC(_x + TO_INT(tmpx), _y + TO_INT(tmpy));
@@ -230,7 +230,7 @@ void Laser::sendtoRaw (long xNew, long yNew)
     wait(LASER_MOVE_DELAY);
     #endif
   }
-  
+
   // for max move, stop if required...
   if (!_laserForceOff && _maxMove != -1 && _moved > _maxMove) {
     off();
@@ -247,7 +247,7 @@ void Laser::sendtoRaw (long xNew, long yNew)
 
 void Laser::drawline(long x1, long y1, long x2, long y2)
 {
-  if (_x != x1 or _y != y1) 
+  if (_x != x1 or _y != y1)
   {
     off();
     sendto(x1,y1);
@@ -259,7 +259,7 @@ void Laser::drawline(long x1, long y1, long x2, long y2)
 
 void Laser::on()
 {
-  if (!_state && !_laserForceOff) 
+  if (!_state && !_laserForceOff)
   {
     wait(LASER_TOGGLE_DELAY);
     _state = 1;
@@ -269,7 +269,7 @@ void Laser::on()
 
 void Laser::off()
 {
-  if (_state) 
+  if (_state)
   {
     wait(LASER_TOGGLE_DELAY);
     _state = 0;
@@ -283,12 +283,12 @@ void Laser::wait(long length)
 }
 
 void Laser::setScale(float scale)
-{ 
+{
   _scale = FROM_FLOAT(scale);
 }
 
 void Laser::setOffset(long offsetX, long offsetY)
-{ 
+{
   _offsetX = offsetX;
   _offsetY = offsetY;
 }
