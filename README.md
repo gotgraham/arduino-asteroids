@@ -30,4 +30,3 @@ C (fire) 6  ->     D9
 GND      7
 
 Licensed under LGPL v2.1 as Asteroids for Hackvision carries that license.
-uint8_t left, uint8_t right, uint8_t up, uint8_t down, uint8_t fire
