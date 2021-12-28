@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <avr/pgmspace.h>
 #include <EEPROM.h>
+
 #include "Laser.h"
 
 #include "button_controller.h"

@@ -3,7 +3,6 @@
 #include "Drawing.h"
 #include "Font.h"
 
-
 void Drawing::drawString(String text, int x, int y, int count)
 {
   for (int loop = 0; loop < count; loop ++)
