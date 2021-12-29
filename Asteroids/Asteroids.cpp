@@ -2,10 +2,8 @@
 #include "Asteroids.hpp"
 #endif
 
-#include "Drawing.h"
-
-Asteroids::Asteroids(Laser * laser) :
- laser(laser) {
+Asteroids::Asteroids(DrawingBuffer * drawing_buffer) :
+ drawing_buffer(drawing_buffer) {
 
   fired = false;
   scored = false;
@@ -107,6 +105,7 @@ boolean Asteroids::detectCollisions() {
         shots[j].ttl = 0xFF;
 
         if (explosions[explosionIndex].index != 255) {
+          // drawing_buffer->removeObject(explosions[explosionIndex].x, explosions[explosionIndex].y, explosion_objects)
           // erasebitmap(explosions[explosionIndex].x, explosions[explosionIndex].y, explosion_bitmaps + ((explosions[explosionIndex].index - 1) * SIZEOF_EXPLOSION_BITMAP_RECORD), 0, 0, 0);
         }
         explosions[explosionIndex].x = asteroids[i].x;
@@ -213,7 +212,8 @@ boolean Asteroids::detectCollisions() {
       if (inPolygon(6, xvert, yvert, sx - saucerX, sy - saucerY)) {
         // Hit by saucer!
         die();
-        // erasebitmap(saucerX, saucerY, saucer_bitmaps, 0, 0, 0);
+        drawing_buffer->removeObject(SAUCER);
+
         saucerX = 255;
         saucerY = 255;
         for (uint8_t k = 0; k < MAX_SHOTS; k++) {
@@ -242,7 +242,7 @@ boolean Asteroids::detectCollisions() {
         sound = EXPLOSION;
         scored = true;
         incrementScore(500);
-        // erasebitmap(saucerX, saucerY, saucer_bitmaps, 0, 0, 0);
+        drawing_buffer->removeObject(SAUCER);
         // tv.set_pixel(shots[j].x, shots[j].y, 0);
         shots[j].ttl = 0xFF;
         if (explosions[explosionIndex].index != 255) {
@@ -289,9 +289,10 @@ void Asteroids::die() {
   playTone(random(50, 100), 300, 9);
   sound = EXPLOSION;
   remainingShips--;
- // erasebitmap(remainingShips * 6, 6, ship_bitmaps, 0, 0, 0);
 
- // erasebitmap(oldShipX, oldShipY, ship_bitmaps + (oldShipHeading * SIZEOF_SHIP_BITMAP_RECORD), 0, 0, 0);
+  drawing_buffer->removeObject(SCORE_SHIP + remainingShips);
+  drawing_buffer->removeObject(SHIP);
+
   // tv.set_pixel(oldShipX + thrustX, oldShipY + thrustY, 0);
   shipExplosion.x = oldShipX - 4;
   if (shipExplosion.x > 250) {
@@ -354,24 +355,19 @@ void Asteroids::displayScore() {
   #if 0
   uint8_t i;
   sprintf(s, "%u", score);
-
-  laser->setScale(0.25);
   Drawing::drawString(s, 100, 15000, 1);
-
-  laser->setScale(32);
-  for (i = 0; i < remainingShips; i++) {
-    Drawing::drawObject(ship_objects, SIZEOF_SHIP_OBJECT_RECORD, i * 6, 106);
-  }
   #endif
+
+  for (int i = 0; i < remainingShips; i++) {
+    drawing_buffer->addObject(SCORE_SHIP + i, i * 6, 106, ship_objects, SIZEOF_SHIP_OBJECT_RECORD, 32);
+  }
 }
 
 // Purpose: Add an asteroid to the drawing list
 void Asteroids::drawAsteroid(Asteroid a) {
   uint8_t asteroid_index = ((a.info >> 4) & 0x7);
   uint8_t vert_count = asteroid_vert_count[asteroid_index];
-
-  laser->setScale(32);
-  Drawing::drawObject(asteroid_objects + (asteroid_index * SIZEOF_ASTEROID_OBJECT_RECORD * 2), vert_count, a.x, a.y);
+  drawing_buffer->addObject(ASTEROID + asteroid_index, a.x, a.y, asteroid_objects + (asteroid_index * SIZEOF_ASTEROID_OBJECT_RECORD * 2), vert_count, 32);
 }
 
 // Purpose: Draw all explosions on screen
@@ -379,30 +375,29 @@ void Asteroids::drawExplosions() {
   // This is the spot for the regular explosions
   for (uint8_t i = 0; i < MAX_EXPLOSIONS; i++) {
     if (explosions[i].index != 255) {
-      // if (explosions[i].index > 0) {
-      //   erasebitmap(explosions[i].x, explosions[i].y, explosion_bitmaps + ((explosions[i].index - 1) * SIZEOF_EXPLOSION_BITMAP_RECORD), 0, 0, 0);
-      // }
+      if (explosions[i].index > 0) {
+        drawing_buffer->removeObject(EXPLOSION + i);
+      }
       if (explosions[i].index > 4) {
         explosions[i].index = 255;
       } else {
         uint8_t vert_count = ship_explosion_vert_count[explosions[i].index];
-        Drawing::drawObject(ship_explosion_objects + (explosions[i].index++ * SIZEOF_EXPLOSION_OBJECT_RECORD), vert_count, explosions[i].x, explosions[i].y);
-        // overlaybitmap(explosions[i].x, explosions[i].y, explosion_bitmaps + (explosions[i].index++ * SIZEOF_EXPLOSION_BITMAP_RECORD), 0, 0, 0);
+        drawing_buffer->addObject(EXPLOSION + i, explosions[i].x, explosions[i].y, ship_explosion_objects + (explosions[i].index++ * SIZEOF_EXPLOSION_OBJECT_RECORD), vert_count, 32);
       }
     }
   }
 
   if (shipExplosion.index != 255) {
     if ((clock % 4) == 0) {
-      // if (shipExplosion.index > 0) {
-      //   erasebitmap(shipExplosion.x, shipExplosion.y, ship_explosion_bitmaps + ((shipExplosion.index - 1) * SIZEOF_EXPLOSION_BITMAP_RECORD), 0, 0, 0);
-      // }
+      if (shipExplosion.index > 0) {
+        uint8_t vert_count = ship_explosion_vert_count[shipExplosion.index-1];
+        drawing_buffer->removeObject(SHIP_EXPLOSION);
+      }
       if (shipExplosion.index > 5) {
         shipExplosion.index = 255;
       } else {
         uint8_t vert_count = ship_explosion_vert_count[shipExplosion.index];
-        Drawing::drawObject(ship_explosion_objects + (shipExplosion.index++ * SIZEOF_EXPLOSION_OBJECT_RECORD), vert_count, shipExplosion.x, shipExplosion.y);
-       // overlaybitmap(shipExplosion.x, shipExplosion.y, ship_explosion_bitmaps + (shipExplosion.index++ * SIZEOF_EXPLOSION_BITMAP_RECORD), 0, 0, 0);
+        drawing_buffer->addObject(SHIP_EXPLOSION, shipExplosion.x, shipExplosion.y, ship_explosion_objects + (shipExplosion.index++ * SIZEOF_EXPLOSION_OBJECT_RECORD), vert_count, 32);
       }
     }
   }
@@ -427,7 +422,8 @@ void Asteroids::drawSaucer() {
 
   if ((saucerX != 255) && (saucerY != 255)) {
     // saucer is active
-    // erasebitmap(saucerX, saucerY, saucer_bitmaps, 0, 0, 0);
+    drawing_buffer->removeObject(SAUCER);
+
     if (random(0, 100) < 3) {
       uint8_t newHeading = saucerHeading + ((random(0, 2) - 1) * 2);
       if (((newHeading > 1) && (newHeading < 7)) || ((newHeading > 9) && (newHeading < 15))) {
@@ -527,12 +523,10 @@ void Asteroids::drawSaucer() {
       }
     }
 
-
-    Drawing::drawObject(saucer_objects, SIZEOF_SAUCER_OBJECT_RECORD, saucerX, saucerY);
-    //overlaybitmap(saucerX, saucerY, saucer_bitmaps, 0, 0, 0);
+    drawing_buffer->addObject(SAUCER, saucerX, saucerY, saucer_objects, SIZEOF_SAUCER_OBJECT_RECORD, 32);
 
     if (saucerX == endSaucerX) {
-      // erasebitmap(saucerX, saucerY, saucer_bitmaps, 0, 0, 0);
+      drawing_buffer->removeObject(SAUCER);
       saucerX = 255;
       saucerY = 255;
       return;
@@ -554,8 +548,10 @@ void Asteroids::drawShip() {
     return;
   }
   // If the ship has moved in some way
-  if (true /*(oldShipHeading != shipHeading) || (oldShipX != (uint8_t)(shipX + 0.5)) || (oldShipY != (uint8_t)(shipY + 0.5)) */) {
-    // erasebitmap(oldShipX, oldShipY, ship_bitmaps + (oldShipHeading * SIZEOF_SHIP_BITMAP_RECORD), 0, 0, 0);
+  if ((oldShipHeading != shipHeading) || (oldShipX != (uint8_t)(shipX + 0.5)) || (oldShipY != (uint8_t)(shipY + 0.5))) {
+
+    drawing_buffer->removeObject(SHIP);
+
     // tv.set_pixel(oldShipX + thrustX, oldShipY + thrustY, 0);
     oldShipHeading = shipHeading;
     oldShipX = (uint8_t)(shipX + 0.5);
@@ -579,8 +575,7 @@ void Asteroids::drawShip() {
       }
     }
 
-    laser->setScale(32);
-    Drawing::drawObject(ship_objects + (shipHeading * SIZEOF_SHIP_OBJECT_RECORD * 2), SIZEOF_SHIP_OBJECT_RECORD, oldShipX, oldShipY);
+    drawing_buffer->addObject(SHIP, oldShipX, oldShipY, ship_objects + (shipHeading * SIZEOF_SHIP_OBJECT_RECORD * 2), SIZEOF_SHIP_OBJECT_RECORD, 32);
 
     // This must be a thrust indicator. We'll need to calculate the rear midpoint of the ship and put the thrust there
     if (Controller.upPressed()) {
@@ -738,15 +733,16 @@ void Asteroids::enterInitials() {
 
 // Purpose: Remove an asteroid from the drawing list
 void Asteroids::eraseAsteroid(Asteroid a) {
-  erasebitmap(a.x, a.y, asteroid_bitmaps + (((a.info >> 4) & 0x7) * SIZEOF_ASTEROID_BITMAP_RECORD), 0, 0, 0);
+  uint8_t asteroid_index = ((a.info >> 4) & 0x7);
+  uint8_t vert_count = asteroid_vert_count[asteroid_index];
+  drawing_buffer->removeObject(ASTEROID + asteroid_index);
 }
 
 // Purpose: Game is over
 void Asteroids::gameOver() {
   delay(500);
-  laser->setScale(0.25);
-  // tv.delay(500);
-  // tv.fill(0);
+  drawing_buffer->removeAll();
+
   //// tv.select_font(font6x8);
   for(int i = 0; i < 100; i++) {
     // Drawing::drawString("GAME OVER", 2048, 2048);
@@ -925,7 +921,7 @@ boolean Asteroids::getInput() {
     if (Controller.downPressed() && (hyperspaceCount == -1)) {
       // Hyperspace!
       // or as my son Paul calls it, "Galaxy Warp"
-      //erasebitmap(oldShipX, oldShipY, ship_bitmaps + (oldShipHeading * SIZEOF_SHIP_BITMAP_RECORD), 0, 0, 0);
+      drawing_buffer->removeObject(SHIP);
       hyperspaceCount = 10;
       input = true;
     }
@@ -957,7 +953,7 @@ void Asteroids::incrementScore(int n) {
 
 // Purpose: Initialize a new game
 void Asteroids::initGame(bool start) {
-  // tv.fill(0);
+  drawing_buffer->removeAll();
 
   // while (!start) {
   //   start = titleScreen();
@@ -967,8 +963,8 @@ void Asteroids::initGame(bool start) {
   // }
   start = true; // JTG
 
-  // tv.fill(0);
-  // tv.delay(100);
+  drawing_buffer->removeAll();
+  delay(100);
 
   level = 1;
   remainingShips = 3;
@@ -1295,8 +1291,6 @@ void Asteroids::moveShot(Shot *s) {
 
 // Purpose: Reposition all the shots on screen
 void Asteroids::moveShots() {
-  laser->setScale(32);
-
   for (int i = 0; i < MAX_SHOTS; i++) {
     if (shots[i].ttl == 0xFF) {
       // this is an unused Shot structure.
@@ -1315,7 +1309,7 @@ void Asteroids::moveShots() {
     shots[i].ttl--;
     moveShot(&shots[i]);
 
-    Drawing::drawObject(fire_object, SIZEOF_FIRE_OBJECT_RECORD, shots[i].x, shots[i].y);
+    drawing_buffer->addObject(FIRE + i, shots[i].x, shots[i].y, fire_object, SIZEOF_FIRE_OBJECT_RECORD, 32);
   }
 
   if (saucerShot.ttl != 0xFF) {
@@ -1327,14 +1321,14 @@ void Asteroids::moveShots() {
     saucerShot.ttl--;
     moveShot(&saucerShot);
 
-    Drawing::drawObject(fire_object, SIZEOF_FIRE_OBJECT_RECORD, saucerShot.x, saucerShot.y);
+    drawing_buffer->addObject(FIRE, saucerShot.x, saucerShot.y, fire_object, SIZEOF_FIRE_OBJECT_RECORD, 32);
   }
 }
 
 // Purpose: Start a new level
 void Asteroids::newLevel() {
-  // tv.delay(500);
-  // tv.fill(0);
+  delay(500);
+  drawing_buffer->removeAll();
   level++;
   initVars();
   drawShip();
@@ -1532,7 +1526,7 @@ void Asteroids::tick() {
 
   drawExplosions();
 
-  if (scored || (clock % 1 == 0)) {
+  if (scored || (clock % 10 == 0)) {
     displayScore();
     scored = false;
   }
@@ -1572,7 +1566,7 @@ void Asteroids::tick() {
 
 // Purpose: Draw the main title screen. Wait for player input to start the game
 boolean Asteroids::titleScreen() {
-  // tv.fill(0);
+  drawing_buffer->removeAll();
 
   // overlaybitmap(0, 10, asteroid_bitmaps + (0 * SIZEOF_ASTEROID_BITMAP_RECORD), 0, 0, 0);
   // overlaybitmap(35, 0, asteroid_bitmaps + (1 * SIZEOF_ASTEROID_BITMAP_RECORD), 0, 0, 0);

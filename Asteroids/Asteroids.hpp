@@ -5,7 +5,7 @@
 #include <avr/pgmspace.h>
 #include <EEPROM.h>
 
-#include "Laser.h"
+#include "DrawingBuffer.hpp"
 
 #include "button_controller.h"
 #include "title_bitmap.h"
@@ -45,8 +45,14 @@
 #define SIN22_5  0.3827 // sin(22.5) and cos(67.5)
 #define F1 100
 #define F2 970
-#define FIRE 1
-#define EXPLOSION 2
+
+#define FIRE 10
+#define EXPLOSION 20
+#define SHIP_EXPLOSION 30
+#define ASTEROID 40
+#define SHIP 50
+#define SCORE_SHIP 60
+#define SAUCER 70
 
 typedef struct Asteroid {
   uint8_t x;
@@ -71,7 +77,7 @@ class Asteroids {
 
   public:
 
-    Asteroids(Laser * laser);
+    Asteroids(DrawingBuffer * drawing_buffer);
 
     // Initialize a new game
     void initGame(bool start);
@@ -227,7 +233,7 @@ class Asteroids {
 
     // const char* const strings[] PROGMEM = {s0, s1, s2, s3};
 
-    Laser * laser;
+    DrawingBuffer * drawing_buffer;
 };
 
 #endif
